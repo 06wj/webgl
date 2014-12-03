@@ -57,18 +57,40 @@
 	}
 
 	function render(){
-		gl.clearColor(255, 0, 0, .5);
-		gl.clear(gl.COLOR_BUFFER_BIT);
-		points.forEach(function(p){
-			gl.vertexAttrib2f(a_Position, (p.x-150)/150, (p.y-75)/-75);
-			gl.vertexAttrib1f(a_PointSize, Math.random()*10);
-			gl.drawArrays(gl.POINTS, 0, 1);
-		});
+		// gl.clearColor(255, 0, 0, .5);
+		// gl.clear(gl.COLOR_BUFFER_BIT);
+		// points.forEach(function(p){
+		// 	gl.vertexAttrib2f(a_Position, (p.x-150)/150, (p.y-75)/-75);
+		// 	gl.vertexAttrib1f(a_PointSize, Math.random()*10);
+		// 	gl.drawArrays(gl.POINTS, 0, 1);
+		// });
 	}
 
 	var vertices = new Float32Array([
-		0.0, 0.5, -0.5, -0.5, 0.5, -0.5
+		-.5, .5, -.5, -.5, .5, .5, .5, -.5
 	]);
+
+	var vertexBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+	gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+	gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
+	gl.enableVertexAttribArray(a_Position);
+	gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
 	</script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
