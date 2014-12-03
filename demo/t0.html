@@ -46,7 +46,7 @@
 
 	var u_FragColor = gl.getUniformLocation(gl.program, "u_FragColor");
 	gl.uniform4f(u_FragColor, 1.0, 0.0, 1.0, .5);
-	
+
 	var points = [];
 	document.onclick = function(e){
 		points.push({
@@ -65,6 +65,10 @@
 			gl.drawArrays(gl.POINTS, 0, 1);
 		});
 	}
+
+	var vertices = new Float32Array([
+		0.0, 0.5, -0.5, -0.5, 0.5, -0.5
+	]);
 	</script>
 </body>
 </html>
