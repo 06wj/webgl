@@ -3,6 +3,12 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Document</title>
+	<style>
+		body, div, canvas{
+			margin:0;
+			padding:0;
+		}
+	</style>
 </head>
 <body>
 	<script src="../lib/webgl-utils.js"></script>
@@ -15,21 +21,50 @@
 	var gl = canvas.getContext("webgl");
 
 	var VSHADER_SOURCE = ' \
+		attribute vec4 a_Position; \
+		attribute float a_PointSize; \
 		void main(){ \
-			gl_Position = vec4(0.0, 0.0, 0.0, 1.0); \
-			gl_PointSize = 10.0; \
+			gl_Position = a_Position; \
+			gl_PointSize = a_PointSize; \
 		} \
 	';
 
 	var FSHADER_SOURCE = ' \
+		precision mediump float; \
+		uniform vec4 u_FragColor; \
 		void main(){ \
-			gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); \
+			gl_FragColor = u_FragColor; \
 		}\
 	';
-	initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE);
+	console.log(initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE));
 	gl.clearColor(255, 0, 0, .5);
 	gl.clear(gl.COLOR_BUFFER_BIT);
-	gl.drawArrays(gl.POINTS, 0, 1);
+
+	var a_Position = gl.getAttribLocation(gl.program, "a_Position");
+	var a_PointSize = gl.getAttribLocation(gl.program, "a_PointSize");
+	gl.vertexAttrib1f(a_PointSize, 10);
+
+	var u_FragColor = gl.getUniformLocation(gl.program, "u_FragColor");
+	gl.uniform4f(u_FragColor, 1.0, 0.0, 1.0, .5);
+	
+	var points = [];
+	document.onclick = function(e){
+		points.push({
+			x:e.clientX,
+			y:e.clientY
+		});
+		render();
+	}
+
+	function render(){
+		gl.clearColor(255, 0, 0, .5);
+		gl.clear(gl.COLOR_BUFFER_BIT);
+		points.forEach(function(p){
+			gl.vertexAttrib2f(a_Position, (p.x-150)/150, (p.y-75)/-75);
+			gl.vertexAttrib1f(a_PointSize, Math.random()*10);
+			gl.drawArrays(gl.POINTS, 0, 1);
+		});
+	}
 	</script>
 </body>
 </html>
