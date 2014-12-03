@@ -23,8 +23,12 @@
 	var VSHADER_SOURCE = ' \
 		attribute vec4 a_Position; \
 		attribute float a_PointSize; \
+		uniform vec4 u_Translation;\
+		uniform float u_Cos, u_Sin;\
 		void main(){ \
-			gl_Position = a_Position; \
+			gl_Position = a_Position;\
+			gl_Position.x = a_Position.x * u_Cos - a_Position.y * u_Sin; \
+			gl_Position.y = a_Position.x * u_Sin + a_Position.y * u_Cos; \
 			gl_PointSize = a_PointSize; \
 		} \
 	';
@@ -44,8 +48,18 @@
 	var a_PointSize = gl.getAttribLocation(gl.program, "a_PointSize");
 	gl.vertexAttrib1f(a_PointSize, 10);
 
+	u_Translation = gl.getUniformLocation(gl.program, "u_Translation");
+	gl.uniform4f(u_Translation, 0.0, .4, 0, 0);
+
 	var u_FragColor = gl.getUniformLocation(gl.program, "u_FragColor");
 	gl.uniform4f(u_FragColor, 1.0, 0.0, 1.0, .5);
+
+	var angle = 30 * Math.PI/180;
+	var u_Cos = gl.getUniformLocation(gl.program, "u_Cos");
+	var u_Sin = gl.getUniformLocation(gl.program, "u_Sin");
+
+	gl.uniform1f(u_Cos, Math.cos(angle));
+	gl.uniform1f(u_Sin, Math.sin(angle));
 
 	var points = [];
 	document.onclick = function(e){
@@ -67,7 +81,7 @@
 	}
 
 	var vertices = new Float32Array([
-		-.5, .5, -.5, -.5, .5, .5, .5, -.5
+		0, 0, -.5, -.5, .5, -.5
 	]);
 
 	var vertexBuffer = gl.createBuffer();
@@ -76,7 +90,7 @@
 
 	gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
 	gl.enableVertexAttribArray(a_Position);
-	gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+	gl.drawArrays(gl.TRIANGLE_FAN, 0, 3);
 	</script>
 </body>
 </html>
