@@ -18,88 +18,102 @@
 
 	<canvas></canvas>
 	<script>
+	var canvasWidth = 300;
+	var canvasHeight = 300;
 	var canvas = document.querySelector("canvas");
+	canvas.width = canvasWidth;
+	canvas.height = canvasHeight;
 	var gl = canvas.getContext("webgl");
 
 	var VSHADER_SOURCE = ' \
 		attribute vec4 a_Position; \
-		attribute float a_PointSize; \
-		uniform mat4 u_transform;\
+		attribute vec2 a_TexCoord;\
+		varying vec2 v_TexCoord;\
 		void main(){ \
-			gl_Position = a_Position * u_transform;\
-			gl_PointSize = a_PointSize; \
+			gl_Position = a_Position;\
+			v_TexCoord = a_TexCoord;\
 		} \
 	';
 
 	var FSHADER_SOURCE = ' \
-		precision mediump float; \
-		uniform vec4 u_FragColor; \
+  		precision mediump float;\
+		uniform sampler2D u_Sampler; \
+		varying vec2 v_TexCoord;\
 		void main(){ \
-			gl_FragColor = u_FragColor; \
+			gl_FragColor = texture2D(u_Sampler, v_TexCoord);\
 		}\
 	';
-	console.log(initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE));
+	initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE);
 	gl.clearColor(255, 0, 0, .5);
 	gl.clear(gl.COLOR_BUFFER_BIT);
 
 	var a_Position = gl.getAttribLocation(gl.program, "a_Position");
-	var a_PointSize = gl.getAttribLocation(gl.program, "a_PointSize");
-	gl.vertexAttrib1f(a_PointSize, 10);
+	var a_TexCoord = gl.getAttribLocation(gl.program, "a_TexCoord");
+	var u_Sampler = gl.getUniformLocation(gl.program, "u_Sampler");
+	
 
+	// gl.getUniformLocation;
+	// gl.getAttribLocation;
+	// gl.vertexAttrib1f;
+	// gl.uniform4f;
 
-	var u_FragColor = gl.getUniformLocation(gl.program, "u_FragColor");
-	gl.uniform4f(u_FragColor, 0.0, 0.0, 1.0, 1.0);
+	// gl.createBuffer;
+	// gl.bindBuffer;
+	// gl.bufferData;
+	// gl.enableVertexAttribArray;
 
-
-	var angle = 30; 
-	var cos = Math.cos(angle);
-	var sin = Math.sin(angle);
-
-	var transform = new Matrix4;
-	transform.rotate(angle, 0, 0, 1);
-	transform.translate(.5, 0, 0);
-
-	var u_transform = gl.getUniformLocation(gl.program, "u_transform");
-	gl.uniformMatrix4fv(u_transform, false, transform.elements);
-
-
-	var points = [];
-	document.onclick = function(e){
-		points.push({
-			x:e.clientX,
-			y:e.clientY
-		});
-		render();
-	}
-
-	function render(){
-		// gl.clearColor(255, 0, 0, .5);
-		// gl.clear(gl.COLOR_BUFFER_BIT);
-		// points.forEach(function(p){
-		// 	gl.vertexAttrib2f(a_Position, (p.x-150)/150, (p.y-75)/-75);
-		// 	gl.vertexAttrib1f(a_PointSize, Math.random()*10);
-		// 	gl.drawArrays(gl.POINTS, 0, 1);
-		// });
-	}
+	// gl.ARRAY_BUFFER;
+	// gl.STATIC_DRAW;
 
 	var vertices = new Float32Array([
-		0, 0, -.5, -.5, .5, -.5
+		-.5, .5, -.3, 1.7,
+		-.5, -.5, -.3, -.2,
+		.5, .5, 1.7, 1.7,
+		.5, -.5, 1.7, -.2
 	]);
 
-	var vertexBuffer = gl.createBuffer();
-	gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+	var size = vertices.BYTES_PER_ELEMENT;
+
+	var n = 4;
+
+	var buffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 	gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
 
-	gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
+	gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, size * 4, 0);
 	gl.enableVertexAttribArray(a_Position);
 
-	setInterval(function(){
-		transform.rotate(angle, 0, 0, 1);
-		gl.uniformMatrix4fv(u_transform, false, transform.elements);
-		gl.clear(gl.COLOR_BUFFER_BIT)
-		gl.drawArrays(gl.TRIANGLE_FAN, 0, 3);
+	gl.vertexAttribPointer(a_TexCoord, 2, gl.FLOAT, false, size * 4, size*2);
+	gl.enableVertexAttribArray(a_TexCoord);
 
-	}, 16)
+	function initTexture(){
+		var texture = gl.createTexture();
+		var img = new Image();
+		img.onload = function(){
+			loadTexture(gl, n, texture, u_Sampler, img);
+		};
+		img.src = "./head.png";
+
+		function loadTexture(gl, n, texture, u_Sampler, image) {
+			gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+			gl.activeTexture(gl.TEXTURE2);
+			gl.bindTexture(gl.TEXTURE_2D, texture);
+
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+			gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+			gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+
+			gl.uniform1i(u_Sampler, 2);
+
+			gl.clear(gl.COLOR_BUFFER_BIT);  
+			gl.drawArrays(gl.TRIANGLE_STRIP, 0, n); 
+		}
+	}
+
+	initTexture();
+	
 	</script>
 </body>
 </html>
