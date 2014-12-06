@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>3d</title>
+	<style>
+		div,body,p{
+			margin: 0;
+			padding: 0;
+		}
+
+		body{
+			background: #000;
+		}
+
+		#game{
+			position:absolute;
+			left:50%;
+			top:50%;
+			margin-left: -275px;
+			margin-top: -200px;
+			border:1px solid #999;
+			background: #111;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="game"></canvas>
+	<script>
+	var gameWidth = 550;
+	var gameHeight = 400;
+	var gameHalfWidth = gameWidth * .5;
+	var gameHalfHeight = gameHeight * .5;
+	var canvas = document.querySelector("#game");
+	canvas.width = gameWidth;
+	canvas.height = gameHeight;
+	var ctx = canvas.getContext("2d");
+
+	var points = [
+		[
+			[0.001704952406493376, 3.595571621201366, 0],
+			[-0.4096351766796766, -2.287129736461529, 1.843358295058547],
+			[-0.5407441013413409, -3.938443014185228, 0]
+		],
+		[
+			[-0.05856716467660217, 3.896932206616831, 0],
+			[-4.277615360493097, -6.409599814592028, 0],
+			[-0.1791113988427926, -3.817898780019041, 0],
+			[2.713950221145665, -6.650688282924397, 0]
+		]
+	];
+
+
+	var angX = 0, angY = 0, vx = 0, vy = 0;
+	setInterval(function(){
+		angX += vx;
+		angY += vy;
+
+		ctx.clearRect(0, 0, 550, 400);
+		points.forEach(function(plane){
+			ctx.beginPath();
+			ctx.strokeStyle = "#f96";
+
+			plane.forEach(function(p, i, arr){
+				var scale = 10;
+				var a = {
+					x:p[0] * scale,
+					y:p[1] * scale,
+					z:p[2] * scale
+				};
+
+				a = rotateX(a.x, a.y, a.z, angX);
+				a = rotateY(a.x, a.y, a.z, angY);
+				to2d(a);
+
+				if(i == 0){
+					ctx.moveTo(a.x, a.y);
+				}
+				else{
+					ctx.lineTo(a.x, a.y);
+				}
+			});
+
+			ctx.closePath();
+			ctx.stroke();
+		});
+	}, 16);
+
+
+	canvas.onmousemove = function(e){
+		var x = e.layerX;
+		var y = e.layerY;
+		vy = (gameHalfWidth - x)/gameWidth * .1;
+		vx = (gameHalfHeight - y)/gameHeight * .1;
+	}
+
+
+
+    function to2d(obj){
+    	var vpx = gameWidth * .5;
+    	var vpy = gameHeight * .5;
+    	var viewDistance = 1000;
+    	var perspective = viewDistance / (viewDistance - obj.z);
+        obj.x = vpx + obj.x * perspective;
+        obj.y = vpy + obj.y * perspective;
+    }
+
+	function rotateX(x, y, z, a) {
+		return {
+			x: x,
+			y: y * Math.cos(a) - z * Math.sin(a),
+			z: y * Math.sin(a) + z * Math.cos(a)
+		};
+	}
+	function rotateY(x, y, z, a) {
+		return {
+			x: x * Math.cos(a) + z * Math.sin(a),
+			y: y,
+			z: z * Math.cos(a) - x * Math.sin(a)
+		};
+	}
+	function rotateZ(x, y, z, a) {
+		return {
+			x: x * Math.cos(a) - y * Math.sin(a),
+			y: x * Math.sin(a) + y * Math.cos(a),
+			z: z
+		};
+	}
+
+
+	</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
