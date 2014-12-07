@@ -20,7 +20,7 @@
 			margin-left: -275px;
 			margin-top: -200px;
 			border:1px solid #999;
-			background: #111;
+			background: #000;
 		}
 	</style>
 </head>
@@ -36,57 +36,7 @@
 	canvas.height = gameHeight;
 	var ctx = canvas.getContext("2d");
 
-	var points = [
-		[
-			[0.001704952406493376, 3.595571621201366, 0],
-			[-0.4096351766796766, -2.287129736461529, 1.843358295058547],
-			[-0.5407441013413409, -3.938443014185228, 0]
-		],
-		[
-			[-0.05856716467660217, 3.896932206616831, 0],
-			[-4.277615360493097, -6.409599814592028, 0],
-			[-0.1791113988427926, -3.817898780019041, 0],
-			[2.713950221145665, -6.650688282924397, 0]
-		]
-	];
-
-
-	var angX = 0, angY = 0, vx = 0, vy = 0;
-	setInterval(function(){
-		angX += vx;
-		angY += vy;
-
-		ctx.clearRect(0, 0, 550, 400);
-		points.forEach(function(plane){
-			ctx.beginPath();
-			ctx.strokeStyle = "#f96";
-
-			plane.forEach(function(p, i, arr){
-				var scale = 10;
-				var a = {
-					x:p[0] * scale,
-					y:p[1] * scale,
-					z:p[2] * scale
-				};
-
-				a = rotateX(a.x, a.y, a.z, angX);
-				a = rotateY(a.x, a.y, a.z, angY);
-				to2d(a);
-
-				if(i == 0){
-					ctx.moveTo(a.x, a.y);
-				}
-				else{
-					ctx.lineTo(a.x, a.y);
-				}
-			});
-
-			ctx.closePath();
-			ctx.stroke();
-		});
-	}, 16);
-
-
+	var vx = 0, vy = 0;
 	canvas.onmousemove = function(e){
 		var x = e.layerX;
 		var y = e.layerY;
@@ -94,40 +44,127 @@
 		vx = (gameHalfHeight - y)/gameHeight * .1;
 	}
 
+	var xhr = new XMLHttpRequest;
+	xhr.open("GET","./plane.obj",true);
+	xhr.onreadystatechange = function(e){
+		if(xhr.readyState == 4 && xhr.status == 200){
+			start(xhr.response);
+		}
+	};
+	xhr.send();
 
+	function start(data){
+		var plane = new threeObj(data);
+		setInterval(function(){
+			plane.angX += vx;
+			plane.angY += vy;
 
-    function to2d(obj){
-    	var vpx = gameWidth * .5;
-    	var vpy = gameHeight * .5;
-    	var viewDistance = 1000;
-    	var perspective = viewDistance / (viewDistance - obj.z);
-        obj.x = vpx + obj.x * perspective;
-        obj.y = vpy + obj.y * perspective;
-    }
-
-	function rotateX(x, y, z, a) {
-		return {
-			x: x,
-			y: y * Math.cos(a) - z * Math.sin(a),
-			z: y * Math.sin(a) + z * Math.cos(a)
-		};
-	}
-	function rotateY(x, y, z, a) {
-		return {
-			x: x * Math.cos(a) + z * Math.sin(a),
-			y: y,
-			z: z * Math.cos(a) - x * Math.sin(a)
-		};
-	}
-	function rotateZ(x, y, z, a) {
-		return {
-			x: x * Math.cos(a) - y * Math.sin(a),
-			y: x * Math.sin(a) + y * Math.cos(a),
-			z: z
-		};
+			ctx.clearRect(0, 0, 550, 400);
+			plane.render();
+		}, 16);
 	}
 
+	function threeObj(data){
+		this.angX = 0;
+		this.angY = 0;
+		this.points = this.parseObjData(data);
+	}
 
+	threeObj.prototype = {
+		constructor:threeObj,
+		parseObjData:function(str){
+			var points = [];
+			var varr = str.match(/[\r\n](v\s[\S\s]+?)\send\s/g);
+
+			varr.forEach(function(v){
+				var isSurface = v.indexOf("surf ") > -1;
+				v = v.replace(/cstype[\s\S]+end\s/, '').replace(/^\s/, "").replace(/v\s/g, "[").replace(/[\r\n]+/g, "],").replace(/[\s]/g, ",");
+
+				v = "[" + v.slice(0, -1) + "]";
+				v = JSON.parse(v);
+				if(isSurface){
+					var last = v[3];
+					v[3] = v[2];
+					v[2] = last;
+				}
+				points.push(v);
+			});
+			return points;
+		},
+		to2d:function(obj){
+			var vpx = gameWidth * .5;
+	    	var vpy = gameHeight * .5;
+	    	var viewDistance = 1000;
+	    	var perspective = viewDistance / (viewDistance - obj.z);
+	        obj.x = vpx + obj.x * perspective;
+	        obj.y = vpy + obj.y * perspective;
+		},
+		render:function(){
+			var that = this;
+			var points = this.points;
+			ctx.lineWidth = 1;
+			points.forEach(function(plane){
+				ctx.beginPath();
+				if(!plane.color){
+					var color = Math.floor(Math.random()*0xffffff).toString(16);
+					color = color.length == 6?color:"000000".slice(0, 6-color.length) + color;
+					plane.color = "#" + color;
+					// plane.color = "#fff";
+				}
+				ctx.strokeStyle = plane.color;
+				// ctx.fillStyle = plane.color;
+
+
+				plane.forEach(function(p, i, arr){
+					var scale = 5;
+					var a = {
+						x:p[0] * scale,
+						y:p[1] * scale,
+						z:p[2] * scale
+					};
+
+					a = that.rotateX(a.x, a.y, a.z, that.angX);
+					a = that.rotateY(a.x, a.y, a.z, that.angY);
+					that.to2d(a);
+
+					if(i == 0){
+						ctx.moveTo(a.x, a.y);
+					}
+					else{
+						ctx.lineTo(a.x, a.y);
+					}
+
+					// ctx.moveTo(a.x, a.y);
+					// ctx.arc(a.x, a.y, 1, 0, Math.PI*2);
+				});
+
+				ctx.closePath();
+				ctx.stroke();
+				// ctx.fill()
+			});
+		},
+		rotateX:function(x, y, z, ang) {
+			return {
+				x: x,
+				y: y * Math.cos(ang) - z * Math.sin(ang),
+				z: y * Math.sin(ang) + z * Math.cos(ang)
+			};
+		},
+		rotateY:function(x, y, z, ang) {
+			return {
+				x: x * Math.cos(ang) + z * Math.sin(ang),
+				y: y,
+				z: z * Math.cos(ang) - x * Math.sin(ang)
+			};
+		},
+		rotateZ:function(x, y, z, ang) {
+			return {
+				x: x * Math.cos(ang) - y * Math.sin(ang),
+				y: x * Math.sin(ang) + y * Math.cos(ang),
+				z: z
+			};
+		}
+	};
 	</script>
 </body>
 </html>
