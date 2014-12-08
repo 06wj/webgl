@@ -10,7 +10,7 @@
 		}
 
 		body{
-			background: #000;
+			background: #eee;
 		}
 
 		#game{
@@ -19,8 +19,8 @@
 			top:50%;
 			margin-left: -275px;
 			margin-top: -200px;
-			border:1px solid #999;
-			background: #000;
+			background: url(./bg.png);
+			/*border: 3px solid #333;*/
 		}
 	</style>
 </head>
@@ -109,7 +109,7 @@
 					var color = Math.floor(Math.random()*0xffffff).toString(16);
 					color = color.length == 6?color:"000000".slice(0, 6-color.length) + color;
 					plane.color = "#" + color;
-					plane.color = "#9f6";
+					plane.color = "#000";
 				}
 				ctx.strokeStyle = plane.color;
 				// ctx.fillStyle = plane.color;
