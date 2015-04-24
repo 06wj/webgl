@@ -11,8 +11,6 @@
 	</style>
 </head>
 <body>
-	<script src="../lib/webgl-utils.js"></script>
-    <script src="../lib/webgl-debug.js"></script>
     <script src="../lib/cuon-utils.js"></script>
     <script src="../lib/cuon-matrix.js"></script>
 
@@ -65,7 +63,7 @@
 	var a_TexCoord = gl.getAttribLocation(gl.program, "a_TexCoord");
 	var u_Sampler = gl.getUniformLocation(gl.program, "u_Sampler");
 	var u_transform = gl.get
-	
+
 
 	// gl.getUniformLocation;
 	// gl.getAttribLocation;
@@ -122,13 +120,13 @@
 
 			gl.uniform1i(u_Sampler, 2);
 
-			gl.clear(gl.COLOR_BUFFER_BIT);  
-			gl.drawArrays(gl.TRIANGLE_STRIP, 0, n); 
+			gl.clear(gl.COLOR_BUFFER_BIT);
+			gl.drawArrays(gl.TRIANGLE_STRIP, 0, n);
 		}
 	}
 
 	initTexture();
-	
+
 	</script>
 </body>
 </html>

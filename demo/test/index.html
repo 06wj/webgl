@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>test</title>
+    <style>
+        html, body{
+            padding:0px;
+            margin:0px;
+        }
+
+        .list{
+            position:absolute;
+            left:0px;
+            top:0px;
+        }
+
+        .list a{
+            text-decoration: none;
+            color:#000;
+        }
+
+        .list li{
+            margin-bottom: 5px;
+        }
+
+        .list .current a{
+            color:#00f;
+        }
+
+        .content{
+            width:400px;
+            margin: 10px auto;
+        }
+
+        .title{
+            text-align: center;
+            height: 30px;
+            line-height: 30px;
+            font-size: 20px;
+        }
+
+        canvas{
+            display: block;
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+<body>
+    <ol class = "list"></ol>
+    <div class = "content">
+        <div class="title"></div>
+        <canvas></canvas>
+    </div>
+    <script src="../../lib/webgl-utils.js"></script>
+    <script src="../../lib/webgl-debug.js"></script>
+    <script src="../../lib/cuon-utils.js"></script>
+    <script src="../../lib/cuon-matrix.js"></script>
+    <script>
+        var lists = [
+            "HelloCanvas",
+            "HelloPoint1",
+            "HelloPoint2",
+            "ClickedPoints",
+            "ColoredPoints",
+            "MultiPoint",
+            "HelloTriangle",
+            "TranslateRotateTriangle",
+            "RotatedTriangle_Matrix"
+        ];
+        var canvasWidth = 400;
+        var canvasHeight = 400;
+        var halfWidth = canvasWidth*.5;
+        var halfHeight = canvasHeight*.5;
+        var canvas = document.querySelector("canvas");
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
+        var gl = getWebGLContext(canvas);
+
+        var canvasPos = canvas.getBoundingClientRect();
+        function loadModule(elem, item, index){
+            if(location.search[1] != index){
+                location.search = "?" + index;
+            }
+            document.querySelector(".title").innerHTML = document.title = item;
+
+            [].slice.call(listElem.childNodes, 0).forEach(function(itemElem){
+                itemElem.className = "";
+            });
+            elem.className = "current";
+            var scriptElem = document.createElement("script");
+            scriptElem.src = "./js/" + item + ".js";
+            document.body.appendChild(scriptElem);
+        }
+
+        var listElem = document.querySelector(".list");
+        lists.forEach(function(item, index){
+            var elem = document.createElement("li");
+            elem.innerHTML = "<a href='javascript:void(0);'>" + item + "</a>";
+            listElem.appendChild(elem);
+            elem.onclick = function(){
+                loadModule(elem, item, index);
+            };
+        });
+
+        var currentIndex = location.search[1]||0;
+        loadModule(listElem.childNodes[currentIndex], lists[currentIndex], currentIndex);
+    </script>
+</body>
+</html>
