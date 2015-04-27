@@ -20,14 +20,6 @@ initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE);
 gl.clearColor(0.0, 0.0, 0.5, 1.0);
 gl.clear(gl.COLOR_BUFFER_BIT);
 
-
-var matrix = new Matrix4();
-matrix.translate(pos.x, pos.y, 0);
-matrix.rotate(rotation, 0, 0, 1);
-
-var u_matrix = gl.getUniformLocation(gl.program, "u_matrix");
-gl.uniformMatrix4fv(u_matrix, false, matrix.elements);
-
 var vertexBuffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
 var vertices = new Float32Array([
@@ -38,4 +30,15 @@ gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
 var a_Position = gl.getAttribLocation(gl.program, "a_Position");
 gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
 gl.enableVertexAttribArray(a_Position);
-gl.drawArrays(gl.TRIANGLES, 0, 3);
+
+
+var u_matrix = gl.getUniformLocation(gl.program, "u_matrix");
+var matrix = new Matrix4();
+
+setInterval(function(){
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.uniformMatrix4fv(u_matrix, false, matrix.elements);
+
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+    matrix.rotate(1, 0, 0, 1);
+}, 1000/60);

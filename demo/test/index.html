@@ -66,8 +66,14 @@
             "MultiPoint",
             "HelloTriangle",
             "TranslateRotateTriangle",
-            "RotatedTriangle_Matrix"
+            "RotatedTriangle_Matrix",
+            "RotatingTriangle",
+            "MultiAttributeSize",
+            "MultiAttributeCollor",
+            "TexturedQuad",
+            "MultiTexture"
         ];
+
         var canvasWidth = 400;
         var canvasHeight = 400;
         var halfWidth = canvasWidth*.5;
@@ -79,7 +85,7 @@
 
         var canvasPos = canvas.getBoundingClientRect();
         function loadModule(elem, item, index){
-            if(location.search[1] != index){
+            if(location.search.slice(1) != index){
                 location.search = "?" + index;
             }
             document.querySelector(".title").innerHTML = document.title = item;
@@ -99,12 +105,12 @@
             elem.innerHTML = "<a href='javascript:void(0);'>" + item + "</a>";
             listElem.appendChild(elem);
             elem.onclick = function(){
-                loadModule(elem, item, index);
+                loadModule(elem, item, index+1);
             };
         });
 
-        var currentIndex = location.search[1]||0;
-        loadModule(listElem.childNodes[currentIndex], lists[currentIndex], currentIndex);
+        var currentIndex = location.search.slice(1)||1;
+        loadModule(listElem.childNodes[currentIndex-1], lists[currentIndex-1], currentIndex);
     </script>
 </body>
 </html>
