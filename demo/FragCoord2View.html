@@ -70,8 +70,7 @@
                     } else if(u_time == 1.0) {
                         pointColor = vec3(1, 1, 0);
                         
-                        vec3 ndcPos = gl_FragCoord.xyz;
-                        ndcPos = ndcPos / u_viewport * 2.0 - 1.0;
+                        vec3 ndcPos = gl_FragCoord.xyz / u_viewport * 2.0 - 1.0;
                         vec3 clipPos = ndcPos / gl_FragCoord.w;
                         vec3 viewPosition = (u_projectionInverseMatrix * vec4(clipPos, 1)).xyz;
                         gl_FragColor = vec4(viewPosition, 1); 
